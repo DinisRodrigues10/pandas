@@ -589,6 +589,12 @@ class DatetimeIndex(DatetimeTimedeltaMixin):
             self._disallow_mismatched_indexing(key)
             key = Timestamp(key)
 
+        # This is needed to handle the case where index contains date objects but key is datetime64
+        if hasattr(self, "_values") and len(self._values) > 0:
+            if isinstance(self._values[0], dt.date) and not isinstance(self._values[0], dt.datetime):
+                # If index contains pure date objects (not datetime), convert timestamp to date
+                key = key.date()
+
         elif isinstance(key, str):
             try:
                 parsed, reso = self._parse_with_reso(key)
